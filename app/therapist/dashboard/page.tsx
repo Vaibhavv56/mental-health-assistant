@@ -9,6 +9,7 @@ interface Patient {
   id: string
   name: string
   email: string
+  createdAt: string
   chats?: Array<{
     id: string
     title: string
