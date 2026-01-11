@@ -130,7 +130,6 @@ export default function TherapistDashboard() {
           }
           // Set guidance from first chat
           setGuidance(data.chats[0].therapistGuidance || '')
-          setIsEditingGuidance(false)
         } else {
           setPatientChats([])
           setSelectedChat(null)
@@ -197,7 +196,6 @@ export default function TherapistDashboard() {
         const data = await response.json()
         // Update the selected chat with new guidance
         setSelectedChat({ ...selectedChat, therapistGuidance: data.chat.therapistGuidance })
-        setIsEditingGuidance(false)
         setShowGuidanceDialog(false)
         alert('Chat direction updated successfully!')
       } else {
