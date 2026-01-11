@@ -15,6 +15,12 @@ interface Patient {
     updatedAt: string
     _count?: { messages: number }
     consents?: Array<{ status: string }>
+    aiAnalyses?: Array<{
+      riskLevel: string | null
+      dominantEmotion: string | null
+      predictedDiagnosis: string | null
+      createdAt: string
+    }>
   }>
   _count?: { chats: number }
 }
@@ -46,6 +52,9 @@ interface AIAnalysis {
   predictions: string | null
   sentiment: string | null
   riskLevel: string | null
+  dominantEmotion: string | null
+  predictedDiagnosis: string | null
+  therapistDiagnosis: string | null
   therapistCorrections: string | null
 }
 
@@ -398,15 +407,58 @@ Generated on ${new Date().toLocaleString()}
                       : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                   }`}
                 >
-                  <div className="font-medium text-gray-900 mb-1">
-                    {patient.name}
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="font-medium text-gray-900 flex-1">
+                      {patient.name}
+                    </div>
+                    {(() => {
+                      const latestChat = patient.chats?.[0]
+                      const latestAnalysis = latestChat?.aiAnalyses?.[0]
+                      const riskLevel = latestAnalysis?.riskLevel || null
+                      return riskLevel ? (
+                        <span
+                          className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded ${
+                            riskLevel === 'high'
+                              ? 'bg-red-100 text-red-800'
+                              : riskLevel === 'medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {riskLevel.toUpperCase()}
+                        </span>
+                      ) : null
+                    })()}
                   </div>
                   <div className="text-xs text-gray-500 mb-2">
                     {patient.email}
                   </div>
-                  <div className="text-xs text-gray-600">
-                    {patient._count?.chats || 0} chat{(patient._count?.chats || 0) !== 1 ? 's' : ''}
+                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <span>{patient._count?.chats || 0} chat{(patient._count?.chats || 0) !== 1 ? 's' : ''}</span>
+                    <span className="text-gray-400">
+                      {new Date(patient.chats?.[0]?.updatedAt || patient.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
+                  {(() => {
+                    const latestChat = patient.chats?.[0]
+                    const latestAnalysis = latestChat?.aiAnalyses?.[0]
+                    const dominantEmotion = latestAnalysis?.dominantEmotion
+                    const predictedDiagnosis = latestAnalysis?.predictedDiagnosis
+                    return (
+                      <>
+                        {dominantEmotion && (
+                          <div className="text-xs text-blue-600 mt-1">
+                            Emotion: {dominantEmotion}
+                          </div>
+                        )}
+                        {predictedDiagnosis && (
+                          <div className="text-xs text-purple-600 mt-1">
+                            Diagnosis: {predictedDiagnosis}
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                 </button>
               ))}
             </div>

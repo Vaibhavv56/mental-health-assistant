@@ -10,41 +10,48 @@ datasource db {
 // SQLite doesn't support enums, using String instead
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password      String
-  name          String
-  role          String    // "PATIENT" or "THERAPIST"
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String // "PATIENT" or "THERAPIST"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Patient-specific
-  therapistId   String?
-  therapist     User?     @relation("PatientTherapist", fields: [therapistId], references: [id])
-  patients      User[]    @relation("PatientTherapist")
+  therapistId String?
+  therapist   User?   @relation("PatientTherapist", fields: [therapistId], references: [id])
+  patients    User[]  @relation("PatientTherapist")
 
   // Relations
-  chats         Chat[]
-  consents      Consent[] @relation("PatientConsents")
-  reports       Report[]
-  aiAnalyses    AIAnalysis[] @relation("TherapistAnalyses")
-  activities    Activity[] @relation("PatientActivities")
-  gratitudeEntries GratitudeEntry[] @relation("PatientGratitude")
-  badges        SelfCompassionBadge[] @relation("PatientBadges")
+  chats            Chat[]
+  consents         Consent[]             @relation("PatientConsents")
+  reports          Report[]
+  aiAnalyses       AIAnalysis[]          @relation("TherapistAnalyses")
+  activities       Activity[]            @relation("PatientActivities")
+  gratitudeEntries GratitudeEntry[]      @relation("PatientGratitude")
+  badges           SelfCompassionBadge[] @relation("PatientBadges")
+  moodEntries      MoodEntry[]           @relation("PatientMood")
+  sleepEntries     SleepEntry[]          @relation("PatientSleep")
+  anxietyEntries   AnxietyEntry[]        @relation("PatientAnxiety")
+  exerciseProgress ExerciseProgress[]    @relation("PatientExercises")
 }
 
 model Chat {
-  id                String    @id @default(uuid())
+  id                String   @id @default(uuid())
   patientId         String
-  patient           User      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  title             String    @default("New Chat")
-  therapistGuidance String?   // Guidance/instructions from therapist to influence AI direction
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  patient           User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title             String   @default("New Chat")
+  therapistGuidance String? // Guidance/instructions from therapist to influence AI direction
+  chatbotTone       String? // "empathetic", "neutral", "clinical", "supportive"
+  questionStyle     String? // "open_ended", "cbt_based", "trauma_informed"
+  systemPrompt      String? // Custom system prompt for chatbot
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  messages      Message[]
-  consents      Consent[]
-  aiAnalyses    AIAnalysis[]
+  messages   Message[]
+  consents   Consent[]
+  aiAnalyses AIAnalysis[]
 }
 
 model Message {
@@ -52,7 +59,7 @@ model Message {
   chatId    String
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   content   String
-  role      String   // "user" or "assistant"
+  role      String // "user" or "assistant"
   createdAt DateTime @default(now())
 
   @@index([chatId])
@@ -74,19 +81,22 @@ model Consent {
 }
 
 model AIAnalysis {
-  id                     String   @id @default(uuid())
-  chatId                 String
-  chat                   Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  therapistId            String
-  therapist              User     @relation("TherapistAnalyses", fields: [therapistId], references: [id])
-  analysis               String
-  predictions            String?
-  sentiment              String?  // "positive", "neutral", "negative", "concerning"
-  riskLevel              String?  // "low", "medium", "high"
-  therapistCorrections   String?
-  correctedAt            DateTime?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                   String    @id @default(uuid())
+  chatId               String
+  chat                 Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  therapistId          String
+  therapist            User      @relation("TherapistAnalyses", fields: [therapistId], references: [id])
+  analysis             String
+  predictions          String?
+  sentiment            String? // "positive", "neutral", "negative", "concerning"
+  riskLevel            String? // "low", "medium", "high"
+  dominantEmotion      String? // AI-detected dominant emotion
+  predictedDiagnosis   String? // AI-predicted diagnosis
+  therapistDiagnosis   String? // Therapist-confirmed diagnosis
+  therapistCorrections String?
+  correctedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@unique([chatId, therapistId])
   @@index([chatId])
@@ -106,33 +116,82 @@ model Report {
 }
 
 model Activity {
-  id          String   @id @default(uuid())
-  patientId   String
-  patient     User     @relation("PatientActivities", fields: [patientId], references: [id], onDelete: Cascade)
-  activityType String  // "emotion_matching", "name_feeling", "breathing", "gratitude", "self_compassion", "grounding", "sounds"
-  data        String   // JSON data for activity-specific information
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  patientId    String
+  patient      User     @relation("PatientActivities", fields: [patientId], references: [id], onDelete: Cascade)
+  activityType String // "emotion_matching", "name_feeling", "breathing", "gratitude", "self_compassion", "grounding", "sounds"
+  data         String // JSON data for activity-specific information
+  createdAt    DateTime @default(now())
 
   @@index([patientId, activityType, createdAt])
 }
 
 model GratitudeEntry {
-  id          String   @id @default(uuid())
-  patientId   String
-  patient     User     @relation("PatientGratitude", fields: [patientId], references: [id], onDelete: Cascade)
-  text        String
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientGratitude", fields: [patientId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
 
   @@index([patientId, createdAt])
 }
 
 model SelfCompassionBadge {
-  id          String   @id @default(uuid())
-  patientId   String
-  patient     User     @relation("PatientBadges", fields: [patientId], references: [id], onDelete: Cascade)
-  badgeType   String   // Badge identifier
-  earnedAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientBadges", fields: [patientId], references: [id], onDelete: Cascade)
+  badgeType String // Badge identifier
+  earnedAt  DateTime @default(now())
 
   @@unique([patientId, badgeType])
   @@index([patientId])
+}
+
+model MoodEntry {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientMood", fields: [patientId], references: [id], onDelete: Cascade)
+  mood      String // emoji or mood name
+  intensity Int // 1-10
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([patientId, createdAt])
+}
+
+model SleepEntry {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientSleep", fields: [patientId], references: [id], onDelete: Cascade)
+  duration  Float // hours
+  quality   Int // 1-10
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([patientId, createdAt])
+}
+
+model AnxietyEntry {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientAnxiety", fields: [patientId], references: [id], onDelete: Cascade)
+  level     Int // 0-10
+  triggers  String? // JSON array of triggers
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([patientId, createdAt])
+}
+
+model ExerciseProgress {
+  id           String    @id @default(uuid())
+  patientId    String
+  patient      User      @relation("PatientExercises", fields: [patientId], references: [id], onDelete: Cascade)
+  exerciseType String // "breathing", "cbt_thought_record", "grounding", "sleep_hygiene"
+  completed    Boolean   @default(false)
+  completedAt  DateTime?
+  streak       Int       @default(0)
+  createdAt    DateTime  @default(now())
+
+  @@index([patientId, exerciseType])
 }

@@ -135,7 +135,41 @@ export default function ActivitiesView({ onClose }: ActivitiesViewProps) {
           })}
         </div>
 
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Recommended Exercises</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Guided Breathing</h4>
+              <p className="text-sm text-gray-600 mb-3">Audio-guided breathing exercises to help you relax</p>
+              <button className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Start Exercise
+              </button>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+              <h4 className="font-semibold text-gray-900 mb-2">CBT Thought Records</h4>
+              <p className="text-sm text-gray-600 mb-3">Track and reframe negative thoughts</p>
+              <button className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                Start Exercise
+              </button>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Grounding Techniques</h4>
+              <p className="text-sm text-gray-600 mb-3">Stay present with sensory grounding exercises</p>
+              <button className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                Start Exercise
+              </button>
+            </div>
+            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Sleep Hygiene Routines</h4>
+              <p className="text-sm text-gray-600 mb-3">Improve your sleep with guided routines</p>
+              <button className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                Start Exercise
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-900">
             <strong>Remember:</strong> All activities are optional. No pressure, no streaks, no penalties. 
             Use them when you need them, exit anytime.

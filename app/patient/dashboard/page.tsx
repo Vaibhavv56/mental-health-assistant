@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Send, Plus, LogOut, MessageSquare, Share2, CheckCircle, XCircle, Clock, Gamepad2, Trash2 } from 'lucide-react'
+import { Send, Plus, LogOut, MessageSquare, Share2, CheckCircle, XCircle, Clock, Gamepad2, Trash2, TrendingUp } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import ActivitiesView from './components/ActivitiesView'
+import TrackingView from './components/tracking/TrackingView'
 
 interface Message {
   id: string
@@ -33,7 +34,7 @@ export default function PatientDashboard() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [showConsentDialog, setShowConsentDialog] = useState(false)
-  const [activeView, setActiveView] = useState<'chat' | 'activities'>('chat')
+  const [activeView, setActiveView] = useState<'chat' | 'activities' | 'health'>('chat')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -268,24 +269,35 @@ export default function PatientDashboard() {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setActiveView('chat')}
-              className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex-1 px-3 py-2 rounded-lg transition-colors text-sm ${
                 activeView === 'chat'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <MessageSquare className="w-4 h-4 inline mr-2" />
+              <MessageSquare className="w-4 h-4 inline mr-1" />
               Chat
             </button>
             <button
+              onClick={() => setActiveView('health')}
+              className={`flex-1 px-3 py-2 rounded-lg transition-colors text-sm ${
+                activeView === 'health'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4 inline mr-1" />
+              My Health
+            </button>
+            <button
               onClick={() => setActiveView('activities')}
-              className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex-1 px-3 py-2 rounded-lg transition-colors text-sm ${
                 activeView === 'activities'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <Gamepad2 className="w-4 h-4 inline mr-2" />
+              <Gamepad2 className="w-4 h-4 inline mr-1" />
               Activities
             </button>
           </div>
@@ -303,6 +315,7 @@ export default function PatientDashboard() {
               </div>
             </>
           )}
+
           
           <button
             onClick={handleLogout}
@@ -506,6 +519,12 @@ export default function PatientDashboard() {
             </div>
           </>
           )}
+        </div>
+      )}
+
+      {activeView === 'health' && (
+        <div className="flex-1 flex flex-col min-h-0 bg-white">
+          <TrackingView onClose={() => setActiveView('chat')} />
         </div>
       )}
 
