@@ -67,6 +67,11 @@ export async function GET(request: NextRequest) {
                   where: { status: 'APPROVED' },
                   orderBy: { requestedAt: 'desc' },
                 },
+                aiAnalyses: {
+                  where: { therapistId: user.id },
+                  orderBy: { createdAt: 'desc' },
+                  take: 1,
+                },
               },
               orderBy: { updatedAt: 'desc' },
             },
