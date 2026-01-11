@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Music, Play, Pause, Volume2, ArrowLeft } from 'lucide-react'
 
 interface CalmingSoundsProps {
