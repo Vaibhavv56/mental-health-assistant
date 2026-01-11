@@ -36,6 +36,15 @@ export async function POST(request: NextRequest) {
           id: analysisId,
           therapistId: user.id,
         },
+        include: {
+          chat: {
+            include: {
+              messages: {
+                orderBy: { createdAt: 'asc' },
+              },
+            },
+          },
+        },
       })
 
       if (analysis) {
@@ -43,7 +52,36 @@ export async function POST(request: NextRequest) {
           ? `${analysis.analysis}\n\nTherapist Corrections:\n${analysis.therapistCorrections}`
           : analysis.analysis
 
-        reportContent = await generateReport(correctedAnalysis, analysis.therapistCorrections || undefined)
+        // Get all approved chats for this patient
+        const chats = await prisma.chat.findMany({
+          where: {
+            patientId,
+            consents: {
+              some: {
+                status: 'APPROVED',
+              },
+            },
+          },
+          include: {
+            messages: {
+              orderBy: { createdAt: 'asc' },
+            },
+          },
+        })
+
+        const chatData = chats.map(chat => ({
+          title: chat.title,
+          messages: chat.messages.map(msg => ({
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+          })),
+        }))
+
+        reportContent = await generateReport(
+          patient.name,
+          chatData,
+          correctedAnalysis
+        )
       }
     }
 
