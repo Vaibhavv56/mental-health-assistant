@@ -42,6 +42,9 @@ interface Chat {
     predictions: string | null
     sentiment: string | null
     riskLevel: string | null
+    dominantEmotion: string | null
+    predictedDiagnosis: string | null
+    therapistDiagnosis: string | null
     therapistCorrections: string | null
     correctedAt: string | null
   }>
