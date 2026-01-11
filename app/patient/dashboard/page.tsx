@@ -379,8 +379,9 @@ export default function PatientDashboard() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {currentChat ? (
+      {activeView === 'chat' && (
+        <div className="flex-1 flex flex-col min-h-0">
+          {currentChat ? (
           <>
             {/* Chat Header */}
             <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between flex-shrink-0">
@@ -504,8 +505,8 @@ export default function PatientDashboard() {
               </form>
             </div>
           </>
-        )}
-      </div>
+          )}
+        </div>
       )}
 
       {activeView === 'activities' && (
