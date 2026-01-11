@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite doesn't support enums, using String instead
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    // "PATIENT" or "THERAPIST"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Patient-specific
+  therapistId   String?
+  therapist     User?     @relation("PatientTherapist", fields: [therapistId], references: [id])
+  patients      User[]    @relation("PatientTherapist")
+
+  // Relations
+  chats         Chat[]
+  consents      Consent[] @relation("PatientConsents")
+  reports       Report[]
+  aiAnalyses    AIAnalysis[] @relation("TherapistAnalyses")
+  activities    Activity[] @relation("PatientActivities")
+  gratitudeEntries GratitudeEntry[] @relation("PatientGratitude")
+  badges        SelfCompassionBadge[] @relation("PatientBadges")
+}
+
+model Chat {
+  id                String    @id @default(uuid())
+  patientId         String
+  patient           User      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title             String    @default("New Chat")
+  therapistGuidance String?   // Guidance/instructions from therapist to influence AI direction
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  messages      Message[]
+  consents      Consent[]
+  aiAnalyses    AIAnalysis[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  content   String
+  role      String   // "user" or "assistant"
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+}
+
+model Consent {
+  id             String    @id @default(uuid())
+  chatId         String
+  chat           Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  patientId      String
+  patient        User      @relation("PatientConsents", fields: [patientId], references: [id], onDelete: Cascade)
+  status         String    @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  requestedAt    DateTime  @default(now())
+  respondedAt    DateTime?
+  therapistNotes String?
+
+  @@unique([chatId, patientId])
+  @@index([chatId, patientId])
+}
+
+model AIAnalysis {
+  id                     String   @id @default(uuid())
+  chatId                 String
+  chat                   Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  therapistId            String
+  therapist              User     @relation("TherapistAnalyses", fields: [therapistId], references: [id])
+  analysis               String
+  predictions            String?
+  sentiment              String?  // "positive", "neutral", "negative", "concerning"
+  riskLevel              String?  // "low", "medium", "high"
+  therapistCorrections   String?
+  correctedAt            DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@unique([chatId, therapistId])
+  @@index([chatId])
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  therapistId String
+  therapist   User     @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  patientId   String
+  title       String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([therapistId, patientId])
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     User     @relation("PatientActivities", fields: [patientId], references: [id], onDelete: Cascade)
+  activityType String  // "emotion_matching", "name_feeling", "breathing", "gratitude", "self_compassion", "grounding", "sounds"
+  data        String   // JSON data for activity-specific information
+  createdAt   DateTime @default(now())
+
+  @@index([patientId, activityType, createdAt])
+}
+
+model GratitudeEntry {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     User     @relation("PatientGratitude", fields: [patientId], references: [id], onDelete: Cascade)
+  text        String
+  createdAt   DateTime @default(now())
+
+  @@index([patientId, createdAt])
+}
+
+model SelfCompassionBadge {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     User     @relation("PatientBadges", fields: [patientId], references: [id], onDelete: Cascade)
+  badgeType   String   // Badge identifier
+  earnedAt    DateTime @default(now())
+
+  @@unique([patientId, badgeType])
+  @@index([patientId])
+}
