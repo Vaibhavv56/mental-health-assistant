@@ -174,7 +174,6 @@ export default function TherapistDashboard() {
       if (response.ok) {
         const data = await response.json()
         setGuidance(data.guidance || '')
-        setIsEditingGuidance(false)
       }
     } catch (error) {
       console.error('Failed to fetch guidance:', error)
