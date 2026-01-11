@@ -102,7 +102,7 @@ export default function CalmingSounds({ onBack }: CalmingSoundsProps) {
         Note: Audio files need to be added to the /public/sounds directory. This is a demo interface.
       </p>
 
-      <audio ref={audioRef} volume={volume} />
+      <audio ref={audioRef} />
     </div>
   )
 }
