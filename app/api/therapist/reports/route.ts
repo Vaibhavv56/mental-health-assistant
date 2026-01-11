@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
     const reports = await prisma.report.findMany({
       where,
       include: {
-        patient: {
+        therapist: {
           select: {
             id: true,
             name: true,
@@ -135,7 +135,25 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json({ reports })
+    // Fetch patient data separately and combine
+    const reportsWithPatient = await Promise.all(
+      reports.map(async (report) => {
+        const patient = await prisma.user.findUnique({
+          where: { id: report.patientId },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        })
+        return {
+          ...report,
+          patient,
+        }
+      })
+    )
+
+    return NextResponse.json({ reports: reportsWithPatient })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Failed to fetch reports' },
